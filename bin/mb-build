@@ -246,6 +246,19 @@ sub parent_dir {
 }
 
 
+##############
+# String utils
+
+sub _strip_common_prefix {
+  my ($text) = @_;
+  
+  my ($prefix) = $text =~ m/^(\s+)/;
+  $text =~ s/^$prefix//gm;
+  
+  return $text;
+}
+
+
 ###########
 # Log stuff
 
