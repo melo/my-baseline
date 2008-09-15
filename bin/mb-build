@@ -131,7 +131,46 @@ sub gen_script_fetch {
 }
 
 sub gen_script_actions {
-  return '';
+  my ($rule) = @_;
+  my $script = '';
+  
+  my $actions = $rule->{actions};
+  
+  foreach my $action (@$actions) {
+    my $action_name = $action->{action};
+
+    my $g;
+    $g = \&_gen_action_autoconf if $action_name eq 'autoconf';
+    next unless $g;
+    
+    $script .= $g->($rule, $action);
+  }
+  
+  return $script;
+}
+
+sub _gen_action_autoconf {
+  my ($rule, $action) = @_;
+  
+  return _strip_common_prefix(<<"  END_OF_AUTOCONF_BLOCK");
+      # Autoconf package
+      if [ ! -d "build/$rule->{vars}{PACKAGE}" ] ; then
+        (
+          cd build
+          tar zxf "../src/$rule->{vars}{TARBALL}"
+        )
+      fi
+      
+      (
+        cd build/$rule->{vars}{PACKAGE}
+        if [ -e Makefile ] ; then
+          make distclean
+        fi
+        ./configure "--prefix=$rule->{vars}{BASELINE}"
+        make
+        make install
+      )
+  END_OF_AUTOCONF_BLOCK
 }
 
 ##############
