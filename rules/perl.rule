@@ -4,6 +4,8 @@
 
 name perl
 
+requires libxml2
+
 set VERSION 5.10.0
 set PACKAGE perl-$VERSION
 set TARBALL $PACKAGE.tar.gz

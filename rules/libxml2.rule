@@ -1,0 +1,13 @@
+#
+# libxml2 setup file
+#
+
+name libxml2
+
+set VERSION 2.7.1
+set PACKAGE libxml2-$VERSION
+set TARBALL $PACKAGE.tar.gz
+
+source ftp://xmlsoft.org/libxml2/$TARBALL
+
+autoconf
