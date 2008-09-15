@@ -5,13 +5,167 @@
 use strict;
 use warnings;
 use English qw( -no_match_vars );
-use File::Spec::Functions;
+use File::Spec::Functions qw( catdir splitdir );
 use File::Path;
+use FindBin;
+use File::Find::Rule;
+use IO::File;
 
 # We assume everything is based on the home of the User
 
-my $base   = (getpwuid($EUID))[7];
-my $prefix = make_sure_directory_exists($base, 'baseline');
+my $base     = (getpwuid($EUID))[7];
+my $prefix   = make_sure_directory_exists($base, 'baseline');
+my $src_base = parent_dir($FindBin::Bin);
+my $rule_dir = catdir($src_base, 'rules');
+
+my $rules = load_rules($rule_dir);
+
+
+
+#######
+# Rules
+
+sub load_rules {
+  my ($rule_dir) = @_;
+  my %rules;
+  
+  my @rule_files = File::Find::Rule->file->name('*.rule')->in($rule_dir);
+  
+  foreach my $rule_file (@rule_files) {
+    my $rule = parse_rule_file($rule_file);
+
+    my $name = $rule->{name};
+    fatal("Missing name tag in rule '$rule_file'") unless $name;
+
+    $rules{$name} = $rule; 
+  }
+  
+  return \%rules;
+}
+
+sub parse_rule_file {
+  my ($rule_file) = @_;
+  my %rule = (
+    file => $rule_file,
+    vars => {
+      BASELINE => $prefix,
+    },
+  );
+
+  my $rule_fh = IO::File->new($rule_file, 'r')
+    || fatal("Could not open rule file '$rule_file': $!");
+  
+  my $parser = \&_parse_rule_globals;
+
+  while (defined(my $rule_line = $rule_fh->getline)) {
+    do {
+      my ($new_line, $next_parser) = $parser->(\%rule, $rule_line);
+      $parser = $next_parser if $next_parser;
+      $rule_line = $new_line;
+    } while ($rule_line);
+  }
+  
+  return \%rule;
+}
+
+sub _parse_rule_comments {
+  my ($rule, $rule_line) = @_;
+  
+  return if $rule_line =~ m/^\s*(#.*)?$/;
+
+  return ($rule_line);  
+}
+
+sub _parse_rule_strip_comments {
+  my ($rule, $rule_line) = @_;
+
+  $rule_line =~ s/^\s*(.+?)\s*$/$1/;
+  $rule_line =~ s/#.*$//;  
+
+  return ($rule_line);  
+}
+
+sub _parse_rule_globals {
+  my ($rule) = @_;
+  
+  return unless _parse_rule_comments(@_);
+  my ($rule_line) = _parse_rule_strip_comments(@_);
+
+  my $actions = $rule->{actions} ||= [];
+
+  if ($rule_line =~ m/^set\s+(\S+)\s+(.+)$/) {
+    $rule->{vars}{$1} = _expand_vars($rule, $2);
+  }
+  elsif ($rule_line =~ m/^source\s+(.+)/) {
+    $rule->{source}{url} = _expand_vars($rule, $1);
+  }
+  elsif ($rule_line =~ m/^name\s+(.+)/) {
+    $rule->{name} = _expand_vars($rule, $1);
+  }
+  elsif ($rule_line =~ m/^source\s+(.+)/) {
+    $rule->{source}{url} = _expand_vars($rule, $1);
+  }
+  elsif ($rule_line =~ m/^(prepare_source|configure|make)(?:\s+(.+))?$/) {
+    push @$actions, {
+      action => $1,
+      args   => $2,
+    };
+  }
+  elsif ($rule_line =~ m/^shell$/) {
+    push @$actions, {
+      action => $1,
+      args   => $2,
+      script => [],
+    };
+    
+    return (undef, \&_parse_rule_shell);
+  }
+  else {
+    print "RL: $rule_line\n";
+  }
+  
+  return;
+}
+
+sub _parse_rule_shell {
+  my ($rule, $rule_line) = @_;
+  
+  return (undef, \&_parse_rule_globals) if $rule_line =~ m/^---$/;
+  
+  my $shell  = $rule->{actions}[-1];
+  my $script = $shell->{script};
+  
+  # Remove leading WS prefix
+  ($shell->{prefix}) = $rule_line =~ m/^(\s+)\S/
+    unless defined $shell->{prefix};
+  $rule_line =~ s/^$shell->{prefix}// if defined $shell->{prefix};
+  
+  chomp($rule_line);
+  push @$script, _expand_vars($rule, $rule_line);
+  
+  return;
+}
+
+sub _expand_vars {
+  my ($rule, $text) = @_;
+  
+  my $v = $rule->{vars} ||= {};
+  $text =~
+    s/
+      \$                  # A $ symbol
+      (                   # followed by label
+        [A-Z]             # with a mandatory LETTER
+        [A-Z0-9_]*        # followed by optional LETTER or DIGITS or _
+      )
+    /
+      exists $v->{$1}?      # If such var exists
+        $v->{$1}            # use it
+        :                   # if not complain loudly
+        fatal("Var '$1' is not defined in rule file $rule->{file}")  
+    /gex;
+  
+  return $text;
+}
 
 
 ##################
@@ -27,6 +181,12 @@ sub make_sure_directory_exists {
   return $dir if -d _;
   
   fatal("Path '$dir' exists but it is not a directory");
+}
+
+sub parent_dir {
+  my @dirs = splitdir($_[0]);
+  pop @dirs;
+  return catdir(@dirs);
 }
 
 

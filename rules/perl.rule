@@ -1,0 +1,24 @@
+#
+# Perl setup file
+#
+
+name perl
+
+set VERSION 5.10.0
+set PACKAGE perl-$VERSION
+set TARBALL $PACKAGE.tar.gz
+
+source http://search.cpan.org/CPAN/authors/id/R/RG/RGARCIA/$TARBALL
+
+prepare_source
+
+configure ./Configure -de -Dprefix=$BASELINE -Dinc_version_list=none
+
+make
+make test
+make install
+
+shell
+  cd /usr/include
+  $BASELINE/bin/h2ph *.h sys/*.h
+---
