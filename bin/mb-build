@@ -98,6 +98,12 @@ sub gen_compile_script {
       fi
       cd "\$BASELINE"
       
+      for dir in build src ; do
+        if [ ! -d \$dir ] ; then
+          mkdir \$dir
+        fi
+      done
+      
   END_OF_HEADER
 
   $script .= gen_script_fetch($rule);  
@@ -114,9 +120,6 @@ sub gen_script_fetch {
   
   return _strip_common_prefix(<<"  END_OF_FETCH");
       # Fetch source
-      if [ ! -d "src" ] ; then
-        mkdir src
-      fi
       if [ ! -e "src/$rule->{vars}{TARBALL}" ] ; then
         (
           cd src
