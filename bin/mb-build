@@ -58,8 +58,12 @@ sub build_rule {
 sub _seach_for_available_rule {
   my ($todo, $done) = @_;
   
+  RULE:
   while (my ($name, $rule) = each %$todo) {
-    # TODO: check for dependencies here
+    my $reqs = $rule->{requires};
+    foreach my $req (@$reqs) {
+      next RULE unless exists $done->{$req};
+    }
     return $rule;
   }
 
@@ -136,7 +140,8 @@ sub _parse_rule_globals {
   return unless _parse_rule_comments(@_);
   my ($rule_line) = _parse_rule_strip_comments(@_);
 
-  my $actions = $rule->{actions} ||= [];
+  my $actions  = $rule->{actions}  ||= [];
+  my $requires = $rule->{requires} ||= [];
 
   if ($rule_line =~ m/^set\s+(\S+)\s+(.+)$/) {
     $rule->{vars}{$1} = _expand_vars($rule, $2);
@@ -146,6 +151,9 @@ sub _parse_rule_globals {
   }
   elsif ($rule_line =~ m/^name\s+(.+)/) {
     $rule->{name} = _expand_vars($rule, $1);
+  }
+  elsif ($rule_line =~ m/^requires\s+(.+)/) {
+    push @$requires, _expand_vars($rule, $1);
   }
   elsif ($rule_line =~ m/^source\s+(.+)/) {
     $rule->{source}{url} = _expand_vars($rule, $1);
