@@ -161,7 +161,7 @@ sub _parse_rule_globals {
   elsif ($rule_line =~ m/^source\s+(.+)/) {
     $rule->{source}{url} = _expand_vars($rule, $1);
   }
-  elsif ($rule_line =~ m/^(prepare_source|configure|make)(?:\s+(.+))?$/) {
+  elsif ($rule_line =~ m/^(autoconf|prepare_source|configure|make)(?:\s+(.+))?$/) {
     push @$actions, {
       action => $1,
       args   => $2,
