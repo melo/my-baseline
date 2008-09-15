@@ -10,7 +10,7 @@ use File::Path;
 
 # We assume everything is based on the home of the User
 
-my $base   = getpwuid($EUID);
+my $base   = (getpwuid($EUID))[7];
 my $prefix = make_sure_directory_exists($base, 'baseline');
 
 
