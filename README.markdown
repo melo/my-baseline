@@ -19,3 +19,13 @@ The following software packages are included on my baseline:
  * libxml2.
 
 
+
+Final notes
+===========
+
+Yes, a lot of could probably be done with apt-get, or rpm.
+
+I did it anyway because I understand this system and it works for me
+exactly as I wanted.
+
+So sue me.
