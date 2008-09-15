@@ -268,8 +268,7 @@ sub _parse_rule_globals {
   }
   elsif ($rule_line =~ m/^shell$/) {
     push @$actions, {
-      action => $1,
-      args   => $2,
+      action => 'shell',
       script => [],
     };
     
