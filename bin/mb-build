@@ -21,10 +21,54 @@ my $rule_dir = catdir($src_base, 'rules');
 
 my $rules = load_rules($rule_dir);
 
+build_all_rules($rules);
 
 
-#######
-# Rules
+
+#########
+# Builder
+
+sub build_all_rules {
+  my ($todo) = @_;
+  my %done;
+  
+  while (%$todo) {
+    my $next = _seach_for_available_rule($todo, \%done);
+    my $name = $next->{name};
+    
+    my $ok = build_rule($next);
+    last unless $ok;
+    
+    $done{$name} = delete $todo->{$name};
+  }
+  
+  return \%done;
+}
+
+sub build_rule {
+  my ($rule) = @_;
+
+  # ... generate shell script...
+  # ... run shell script, capture output ...
+  # ... check output for errors ...
+
+  1;
+}
+
+sub _seach_for_available_rule {
+  my ($todo, $done) = @_;
+  
+  while (my ($name, $rule) = each %$todo) {
+    # TODO: check for dependencies here
+    return $rule;
+  }
+
+  fatal("Could not decide on next rule to run: ", $todo, $done);  
+}
+
+
+##############
+# Rules parser
 
 sub load_rules {
   my ($rule_dir) = @_;
