@@ -1,0 +1,40 @@
+#!/usr/bin/perl -w
+#
+#
+
+use strict;
+use warnings;
+use English qw( -no_match_vars );
+use File::Spec::Functions;
+use File::Path;
+
+# We assume everything is based on the home of the User
+
+my $base   = getpwuid($EUID);
+my $prefix = make_sure_directory_exists($base, 'baseline');
+
+
+##################
+# Filesystem utils
+
+sub make_sure_directory_exists {
+  my $dir = catdir(@_);
+  if (! -e $dir) {
+    mkpath($dir, 0, 0755);
+    return $dir;
+  }
+  
+  return $dir if -d _;
+  
+  fatal("Path '$dir' exists but it is not a directory");
+}
+
+
+###########
+# Log stuff
+
+sub fatal {
+  print STDERR "FATAL: ", @_, "\n";
+  exit(1);
+}
+
