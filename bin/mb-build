@@ -51,12 +51,15 @@ sub build_rule {
   # ... generate shell script...
   # ... run shell script, capture output ...
   # ... check output for errors ...
-
+  
   1;
 }
 
 sub _seach_for_available_rule {
   my ($todo, $done) = @_;
+  
+  # Reset each iterator
+  keys %$todo;
   
   RULE:
   while (my ($name, $rule) = each %$todo) {
