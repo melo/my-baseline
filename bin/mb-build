@@ -10,6 +10,7 @@ use File::Path;
 use FindBin;
 use File::Find::Rule;
 use IO::File;
+use Data::Dumper;
 
 # We assume everything is based on the home of the User
 
@@ -194,7 +195,16 @@ sub parent_dir {
 # Log stuff
 
 sub fatal {
-  print STDERR "FATAL: ", @_, "\n";
+  print STDERR "FATAL: ";
+  foreach my $t (@_) {
+    if (ref($t)) {
+      print STDERR "\n", Dumper($t);
+    }
+    else {
+      print STDERR $t;
+    }
+  }
+  print STDERR "\n";
   exit(1);
 }
 
