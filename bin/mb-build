@@ -357,7 +357,8 @@ sub _parse_rule_globals {
     $rule->{source}{url} = _expand_vars($rule, $1);
   }
   elsif ($rule_line =~ m/^name\s+(.+)/) {
-    $rule->{name} = _expand_vars($rule, $1);
+    my $name = _expand_vars($rule, $1);
+    $rule->{vars}{NAME} = $rule->{name} = $name;
   }
   elsif ($rule_line =~ m/^requires\s+(.+)/) {
     push @$requires, _expand_vars($rule, $1);
