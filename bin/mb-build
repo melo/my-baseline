@@ -142,6 +142,7 @@ sub gen_script_actions {
     my $g;
     $g = \&_gen_action_autoconf       if $action_name eq 'autoconf';
     $g = \&_gen_action_prepare_source if $action_name eq 'prepare_source';
+    $g = \&_gen_action_configure      if $action_name eq 'configure';
     next unless $g;
     
     $script .= $g->($rule, $action);
@@ -186,6 +187,19 @@ sub _gen_action_prepare_source {
       )
       
   END_OF_PREPARE_SOURCE_BLOCK
+}
+
+sub _gen_action_configure {
+  my ($rule, $action) = @_;
+  
+  return _strip_common_prefix(<<"  END_OF_CONFIGURE_BLOCK");
+      # Configure
+      (
+        cd build/$rule->{vars}{PACKAGE}
+        $action->{args}
+      )
+      
+  END_OF_CONFIGURE_BLOCK
 }
 
 ##############
