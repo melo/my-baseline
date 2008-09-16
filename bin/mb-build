@@ -244,6 +244,7 @@ sub _parse_rule_globals {
 
   my $actions  = $rule->{actions}  ||= [];
   my $requires = $rule->{requires} ||= [];
+  my $lib_dirs = $rule->{lib_dirs} ||= [];
 
   if ($rule_line =~ m/^set\s+(\S+)\s+(.+)$/) {
     $rule->{vars}{$1} = _expand_vars($rule, $2);
@@ -256,6 +257,9 @@ sub _parse_rule_globals {
   }
   elsif ($rule_line =~ m/^requires\s+(.+)/) {
     push @$requires, _expand_vars($rule, $1);
+  }
+  elsif ($rule_line =~ m/^library_path\s+(.+)/) {
+    push @$lib_dirs, _expand_vars($rule, $1);
   }
   elsif ($rule_line =~ m/^source\s+(.+)/) {
     $rule->{source}{url} = _expand_vars($rule, $1);
