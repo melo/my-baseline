@@ -144,8 +144,8 @@ sub gen_script_actions {
     $g = \&_gen_action_prepare_source if $action_name eq 'prepare_source';
     $g = \&_gen_action_configure      if $action_name eq 'configure';
     $g = \&_gen_action_make           if $action_name eq 'make';
-    next unless $g;
-    
+    fatal("Action '$action_name' not supported") unless $g;
+        
     $script .= $g->($rule, $action);
   }
   
@@ -326,7 +326,7 @@ sub _parse_rule_globals {
     return (undef, \&_parse_rule_shell);
   }
   else {
-    print "RL: $rule_line\n";
+    fatal("Unparsable rule line in '$rule->{file}': '$rule_line'")
   }
   
   return;
