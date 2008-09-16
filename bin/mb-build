@@ -11,6 +11,7 @@ use FindBin;
 use File::Find::Rule;
 use IO::File;
 use Data::Dumper;
+use File::Temp;
 
 # We assume everything is based on the home of the User
 
@@ -50,7 +51,10 @@ sub build_rule {
 
   # ... generate shell script...
   my $script = gen_compile_script($rule);
+
   # ... run shell script, capture output ...
+  my $output = run_shell_script($script);
+  
   # ... check output for errors ...
   
   1;
@@ -72,6 +76,25 @@ sub _seach_for_available_rule {
   }
 
   fatal("Could not decide on next rule to run: ", $todo, $done);  
+}
+
+
+###############
+# Process utils
+
+sub run_shell_script {
+  my ($script) = @_;
+  
+  my $tmp = File::Temp->new(
+      TEMPLATE => 'mb-build-compile-XXXXX',
+      TMPDIR   => 1,
+  );
+  
+  $tmp->syswrite($script);
+  $tmp->flush;
+  
+  my $filename = $tmp->filename;
+  return `/bin/sh $filename 2>&1`;
 }
 
 
