@@ -140,7 +140,8 @@ sub gen_script_actions {
     my $action_name = $action->{action};
 
     my $g;
-    $g = \&_gen_action_autoconf if $action_name eq 'autoconf';
+    $g = \&_gen_action_autoconf       if $action_name eq 'autoconf';
+    $g = \&_gen_action_prepare_source if $action_name eq 'prepare_source';
     next unless $g;
     
     $script .= $g->($rule, $action);
@@ -152,8 +153,24 @@ sub gen_script_actions {
 sub _gen_action_autoconf {
   my ($rule, $action) = @_;
   
-  return _strip_common_prefix(<<"  END_OF_AUTOCONF_BLOCK");
+  return _gen_action_prepare_source(@_)
+       . _strip_common_prefix(<<"  END_OF_AUTOCONF_BLOCK");
       # Autoconf package
+      (
+        cd build/$rule->{vars}{PACKAGE}
+        ./configure "--prefix=$rule->{vars}{BASELINE}"
+        make
+        make install
+      )
+      
+  END_OF_AUTOCONF_BLOCK
+}
+
+sub _gen_action_prepare_source {
+  my ($rule, $action) = @_;
+  
+  return _strip_common_prefix(<<"  END_OF_PREPARE_SOURCE_BLOCK");
+      # Prepare source
       if [ ! -d "build/$rule->{vars}{PACKAGE}" ] ; then
         (
           cd build
@@ -166,11 +183,9 @@ sub _gen_action_autoconf {
         if [ -e Makefile ] ; then
           make distclean
         fi
-        ./configure "--prefix=$rule->{vars}{BASELINE}"
-        make
-        make install
       )
-  END_OF_AUTOCONF_BLOCK
+      
+  END_OF_PREPARE_SOURCE_BLOCK
 }
 
 ##############
