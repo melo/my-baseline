@@ -5,7 +5,18 @@ This is my system for setting up a baseline system.
 
 It includes most of the stuff I use on my projects.
 
-Usually I have an account for each project baseline to keep them totally separate.
+Usually I have an account for each project baseline to keep them
+totally separate.
+
+
+TODO
+====
+
+ * add support for SHA1/MD5 verification of downloads;
+ * each package will be installed in a subdirectory: bin/ will be filled
+   with symblinks;
+ * convert Apache and mod_perl compile scripts;
+ * convert dbj-ware stuff.
 
 
 Included Software
@@ -14,10 +25,8 @@ Included Software
 The following software packages are included on my baseline:
 
  * perl5;
- * apache2;
- * mod_perl2;
- * libxml2.
-
+ * libxml2;
+ * ruby.
 
 
 Final notes
