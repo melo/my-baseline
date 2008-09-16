@@ -143,6 +143,7 @@ sub gen_script_actions {
     $g = \&_gen_action_autoconf       if $action_name eq 'autoconf';
     $g = \&_gen_action_prepare_source if $action_name eq 'prepare_source';
     $g = \&_gen_action_configure      if $action_name eq 'configure';
+    $g = \&_gen_action_make           if $action_name eq 'make';
     next unless $g;
     
     $script .= $g->($rule, $action);
@@ -201,6 +202,23 @@ sub _gen_action_configure {
       
   END_OF_CONFIGURE_BLOCK
 }
+
+sub _gen_action_make {
+  my ($rule, $action) = @_;
+  
+  my $args = $action->{args};
+  $args = '' unless defined $args;
+  
+  return _strip_common_prefix(<<"  END_OF_MAKE_BLOCK");
+      # Make something
+      (
+        cd build/$rule->{vars}{PACKAGE}
+        make $args
+      )
+      
+  END_OF_MAKE_BLOCK
+}
+
 
 ##############
 # Rules parser
