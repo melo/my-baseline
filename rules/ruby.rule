@@ -1,0 +1,15 @@
+#
+# ruby setup file
+#
+
+name ruby
+
+set MAJOR_VERSION 1.8
+set VERSION $MAJOR_VERSION.6
+set PATCH_LEVEL 114
+set PACKAGE $NAME-$VERSION-p$PATCH_LEVEL
+set TARBALL $PACKAGE.tar.gz
+
+source ftp://ftp.ruby-lang.org/pub/ruby/$MAJOR_VERSION/$TARBALL
+
+autoconf
