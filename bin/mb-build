@@ -12,6 +12,7 @@ use File::Find::Rule;
 use IO::File;
 use Data::Dumper;
 use File::Temp;
+use IPC::Open2;
 
 # We assume everything is based on the home of the User
 
@@ -94,7 +95,17 @@ sub run_shell_script {
   $tmp->flush;
   
   my $filename = $tmp->filename;
-  return `/bin/sh $filename 2>&1`;
+  
+  my ($chld_out, $chld_in);
+  my $pid = open2($chld_out, $chld_in, '/bin/sh', $filename);
+
+  my $output = '';
+  while (my $line = <$chld_out>) {
+    print ">> $line";
+    $output .= $line;
+  }
+  
+  return $output;
 }
 
 
@@ -114,6 +125,8 @@ sub gen_compile_script {
       # based on rules from:
       #   $rule->{file}
       #
+      
+      exec 2>&1
       
       BASELINE='$rule->{vars}{BASELINE}';
       if [ ! -d "\$BASELINE" ] ; then
