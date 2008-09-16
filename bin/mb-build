@@ -356,6 +356,9 @@ sub _parse_rule_globals {
   elsif ($rule_line =~ m/^source\s+(.+)/) {
     $rule->{source}{url} = _expand_vars($rule, $1);
   }
+  elsif ($rule_line =~ m/^signature\s+(\S+)\s+(\S+)$/) {
+    $rule->{source}{sigs}{$1} = $2;
+  }
   elsif ($rule_line =~ m/^name\s+(.+)/) {
     my $name = _expand_vars($rule, $1);
     $rule->{vars}{NAME} = $rule->{name} = $name;
