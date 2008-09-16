@@ -11,6 +11,8 @@ set PACKAGE perl-$VERSION
 set TARBALL $PACKAGE.tar.gz
 
 source http://search.cpan.org/CPAN/authors/id/R/RG/RGARCIA/$TARBALL
+signature sha1 adf73606dd5248af7ccdd735bcaa0e628ea75b3c
+signature md5  d2c39b002ebfd2c3c5dba589365c5a71
 
 prepare_source
 

@@ -9,6 +9,8 @@ set PACKAGE libxml2-$VERSION
 set TARBALL $PACKAGE.tar.gz
 
 source ftp://xmlsoft.org/libxml2/$TARBALL
+signature sha1 54b2d24ce0b716054628303bff47cf0db2966d84
+signature md5  abc093e9ac7ea1aabf37982ae9df6d6c
 
 autoconf
 

@@ -11,5 +11,7 @@ set PACKAGE $NAME-$VERSION-p$PATCH_LEVEL
 set TARBALL $PACKAGE.tar.gz
 
 source ftp://ftp.ruby-lang.org/pub/ruby/$MAJOR_VERSION/$TARBALL
+signature sha1 149d19caa3059de9faef34f80630642fd61651ad
+signature md5  500a9f11613d6c8ab6dcf12bec1b3ed3
 
 autoconf
