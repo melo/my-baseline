@@ -144,6 +144,7 @@ sub gen_script_actions {
     $g = \&_gen_action_prepare_source if $action_name eq 'prepare_source';
     $g = \&_gen_action_configure      if $action_name eq 'configure';
     $g = \&_gen_action_make           if $action_name eq 'make';
+    $g = \&_gen_action_shell          if $action_name eq 'shell';
     fatal("Action '$action_name' not supported") unless $g;
         
     $script .= $g->($rule, $action);
@@ -217,6 +218,26 @@ sub _gen_action_make {
       )
       
   END_OF_MAKE_BLOCK
+}
+
+sub _gen_action_shell {
+  my ($rule, $action) = @_;
+  
+  my $script = _strip_common_prefix(<<"  END_OF_SHELL_HEADER_BLOCK");
+      # Shell
+      (
+        cd build/$rule->{vars}{PACKAGE}
+  END_OF_SHELL_HEADER_BLOCK
+  
+  foreach my $cmd (@{$action->{script}}) {
+    $script .= "  $cmd\n";
+  }
+  
+  $script .= _strip_common_prefix(<<"  END_OF_SHELL_FOOTER_BLOCK");
+      )
+  END_OF_SHELL_FOOTER_BLOCK
+
+  return $script;
 }
 
 
